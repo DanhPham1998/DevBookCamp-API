@@ -1,0 +1,20 @@
+{
+    "name": "nodejs-project",
+    "version": "1.0.0",
+    "description": "Learning Nodejs Lv2",
+    "main": "sever.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "NODE_ENV=production node sever",
+        "dev": "nodemon sever.js"
+    },
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "nodemon": "^2.0.20"
+    },
+    "dependencies": {
+        "dotenv": "^16.0.3",
+        "express": "^4.18.2"
+    }
+}
