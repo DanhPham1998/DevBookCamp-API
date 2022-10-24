@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const bookcampController = require('./../controllers/bookcampController');
+const bookcampController = require('../controllers/bootcampController');
 
 router
   .route('/')
