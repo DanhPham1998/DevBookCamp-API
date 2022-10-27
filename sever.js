@@ -7,6 +7,7 @@ require('dotenv').config({ path: './config/.env' }); //Config nhanh dotenv
 
 // Router import file
 const bookcampRouter = require('./routes/bookcampRoutes');
+const courseRouter = require('./routes/courseRoutes');
 const { json } = require('express');
 
 const app = express();
@@ -23,7 +24,8 @@ app.use(morgan('dev'));
 connectDB();
 
 // Router
-app.use('/api/v1/bookcamps', bookcampRouter);
+app.use('/api/v1/bootcamps', bookcampRouter);
+app.use('/api/v1/courses', courseRouter);
 
 // Global Error Handle
 app.use(globalErrorHandle);
