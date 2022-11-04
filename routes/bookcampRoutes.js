@@ -1,31 +1,48 @@
 const express = require('express');
 const router = express.Router();
 
-const bookcampController = require('../controllers/bootcampController');
+const bootcampController = require('../controllers/bootcampController');
+const {
+  uploadBootcampPhoto,
+  resizeBootcampPhoto,
+} = require('../middleware/uploadImage');
 
 // Import router other
 const courseRouter = require('./courseRoutes');
+const reviewRouter = require('./reviewRoutes');
+const { protect, authorize } = require('./../middleware/authProtect');
 
 // Re-Router(Nối router) từ router bootcamm sang router courser
 // để lấy tất cả khoả học(course) thuộc id của bootcamp này
 router.use('/:bootcampId/courses', courseRouter);
+router.use('/:bootcampId/reviews', reviewRouter);
 
 router
   .route('/')
-  .get(bookcampController.getAllBookcamp)
-  .post(bookcampController.createBookcamp);
+  .get(bootcampController.getAllBookcamp)
+  .post(
+    protect,
+    authorize('publisher', 'admin'),
+    bootcampController.createBookcamp
+  );
 
 router
   .route('/:id')
-  .get(bookcampController.getBookcamp)
+  .get(bootcampController.getBookcamp)
   .put(
-    bookcampController.uploadBootcampPhoto,
-    bookcampController.resizeBootcampPhoto,
-    bookcampController.updateBookCamp
+    protect,
+    authorize('publisher', 'admin'),
+    uploadBootcampPhoto,
+    resizeBootcampPhoto('bootcamp', 'bootcamps'),
+    bootcampController.updateBookCamp
   )
-  .delete(bookcampController.deleteBookCamp);
+  .delete(
+    protect,
+    authorize('publisher', 'admin'),
+    bootcampController.deleteBookCamp
+  );
 
 router
   .route('/radius/:zipcode/:distance')
-  .get(bookcampController.getBootcampsInradius);
+  .get(bootcampController.getBootcampsInradius);
 module.exports = router;

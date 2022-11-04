@@ -51,7 +51,9 @@ exports.getCourse = catchAsync(async (req, res, next) => {
   });
 
   if (!course) {
-    return new ErrorResponse(`Course not found with id ${req.params.id}`, 404);
+    return next(
+      new ErrorResponse(`Course not found with id ${req.params.id}`, 404)
+    );
   }
 
   res.status(200).json({
@@ -64,14 +66,27 @@ exports.getCourse = catchAsync(async (req, res, next) => {
 // @route     GET /api/v1/bootcamps/:bootcampId/courses/
 // @access    Private
 exports.addCourse = catchAsync(async (req, res, next) => {
+  req.body.user = req.user.id;
   req.body.bootcamp = req.params.bootcampId;
 
   const bootcamp = await Bootcamp.findById(req.params.bootcampId);
 
   if (!bootcamp) {
-    return new ErrorResponse(
-      `Bootcamp not found with id ${req.params.bootcampId}`,
-      404
+    return next(
+      new ErrorResponse(
+        `Bootcamp not found with id ${req.params.bootcampId}`,
+        404
+      )
+    );
+  }
+
+  // Make sure user is bootcamp owner(chủ)
+  if (bootcamp.user.toString() !== req.user.id && req.user.role !== 'admin') {
+    return next(
+      new ErrorResponse(
+        `Your are not add a course this bootcamp because your are not creator boocamp ${bootcamp.id}`,
+        401
+      )
     );
   }
 
@@ -84,18 +99,31 @@ exports.addCourse = catchAsync(async (req, res, next) => {
 });
 
 // @desc      Update Course
-// @route     PUT /api/v1/course/:id
+// @route     PUT /api/v1/courses/:id
 // @access    Private
 exports.updateCourse = catchAsync(async (req, res, next) => {
-  const course = await Course.findByIdAndUpdate(req.params.id, req.body, {
+  let course = await Course.findById(req.params.id);
+
+  if (!course) {
+    return next(
+      new ErrorResponse(`Course not found with id ${req.params.id}`, 404)
+    );
+  }
+
+  // Make sure user is bootcamp owner(chủ)
+  if (course.user.toString() !== req.user.id && req.user.role !== 'admin') {
+    return next(
+      new ErrorResponse(
+        `Your are not update this course because your are not creator course ${course.id}`,
+        401
+      )
+    );
+  }
+
+  course = await Course.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true,
   });
-
-  if (!course) {
-    return new ErrorResponse(`Course not found with id ${req.params.id}`, 404);
-  }
-
   res.status(200).json({
     status: 'success',
     data: course,
@@ -109,7 +137,19 @@ exports.deleteCourse = catchAsync(async (req, res, next) => {
   const course = await Course.findById(req.params.id);
 
   if (!course) {
-    return new ErrorResponse(`Course not found with id ${req.params.id}`, 404);
+    return next(
+      new ErrorResponse(`Course not found with id ${req.params.id}`, 404)
+    );
+  }
+
+  // Make sure user is bootcamp owner(chủ)
+  if (course.user.toString() !== req.user.id && req.user.role !== 'admin') {
+    return next(
+      new ErrorResponse(
+        `Your are not delete this course because your are not creator course ${course.id}`,
+        401
+      )
+    );
   }
 
   course.remove();

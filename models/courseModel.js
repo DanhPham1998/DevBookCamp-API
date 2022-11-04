@@ -6,7 +6,7 @@ const courseSchema = new mongoose.Schema({
     trim: true,
     required: [true, 'Please add a course title'],
     minlength: [5, 'A course name must have more or equal then 5 characters'],
-    maxlength: [40, 'A course name must have more or equal then 10 characters'],
+    maxlength: [40, 'A course name must have more or equal then 40 characters'],
   },
   description: {
     type: String,
@@ -45,6 +45,11 @@ const courseSchema = new mongoose.Schema({
     ref: 'Bootcamp',
     required: [true, 'A Course need Bootcamp'],
   },
+  user: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'User',
+    required: true,
+  },
 });
 
 //Ref tới bảng bootcamps , chạy trước khi được gọi find
@@ -69,8 +74,7 @@ courseSchema.statics.getAverageCost = async function (bootcampId) {
       },
     },
   ]);
-  console.log(obj);
-  console.log(obj.length);
+
   // Update lại document Bootcamp để thêm averageCost
   if (obj.length > 0) {
     await this.model('Bootcamp').findByIdAndUpdate(bootcampId, {
@@ -79,7 +83,7 @@ courseSchema.statics.getAverageCost = async function (bootcampId) {
     });
   } else {
     await this.model('Bootcamp').findByIdAndUpdate(bootcampId, {
-      averageCost: 0,
+      averageCost: 4.5,
     });
   }
 };

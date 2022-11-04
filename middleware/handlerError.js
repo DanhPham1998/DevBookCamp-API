@@ -5,7 +5,7 @@ module.exports = (err, req, res, next) => {
   err.status = err.status || 'error';
 
   if (process.env.NODE_ENV === 'development') {
-    console.log('ERROR xxx', error);
+    console.log('ERROR xxx', err);
     sendErrorDev(err, req, res);
   } else {
     let error = JSON.parse(JSON.stringify(err));
@@ -25,7 +25,9 @@ module.exports = (err, req, res, next) => {
     // Mongoosee Validation Error (Xác thực dữ liệu nhập vào)
     if (error.name === 'ValidationError')
       error = handleValidationErrorDB(error);
-
+    // Json web token wrong
+    if (error.name === 'JsonWebTokenError')
+      error = handleJsonWebTokenError(error);
     sendErrorProd(error, req, res);
   }
 };
@@ -49,7 +51,7 @@ const sendErrorProd = (err, req, res) => {
 // @Xử lý tất cả các lỗi có thê bắt cho Api production
 
 const handleCastErrorDB = (err) => {
-  const message = `Invalid ${err.path} : ${err.value}`;
+  const message = `Invalid ${err.path} with ID: ${err.value}`;
   return new ErrorResponse(message, 404);
 };
 
@@ -64,6 +66,11 @@ const handleDuplicateFieldsDB = (err) => {
 
 const handleValidationErrorDB = (err) => {
   const value = Object.values(err.errors).map((item) => item.message);
-  const message = `Invalid inout data: ${value.join(', ')}`;
+  const message = `Invalid input data: ${value.join(', ')}`;
   return new ErrorResponse(message, 400);
+};
+
+const handleJsonWebTokenError = (err) => {
+  const message = `Access Token Invalid`;
+  return new ErrorResponse(message, 404);
 };
