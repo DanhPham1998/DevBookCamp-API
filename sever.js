@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const morgan = require('morgan');
 const connectDB = require('./config/db');
 const colors = require('colors'); // Tạo màu console.log
@@ -55,6 +56,9 @@ app.use(limiter);
 
 // Conect to database
 connectDB();
+
+// Set static folder
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Router
 app.use('/api/v1/bootcamps', bookcampRouter);
